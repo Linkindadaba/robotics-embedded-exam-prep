@@ -1,8 +1,29 @@
+# Python cache
 __pycache__/
 *.py[cod]
 *$py.class
+
+# Environments & logs
 .env
 .venv
 env/
 venv/
 *.log
+
+# Large source lecture PDFs & images not needed for Streamlit app
+BASICSMBCPS*.pdf
+Chpt1MBCPS*.pdf
+EMBEDDED.pdf
+IOSENSORS.pdf
+KINEMATICS.pdf
+ROBOTICS.pdf
+RotationCPS*.pdf
+TYPESMBCPS*.pdf
+practical.pdf
+WhatsApp*.jpeg
+WhatsApp*.jpg
+WhatsApp*.png
+
+# Build & OS artifacts
+.DS_Store
+Thumbs.db
