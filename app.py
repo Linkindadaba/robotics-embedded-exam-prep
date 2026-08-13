@@ -21,109 +21,132 @@ if not os.path.exists(PDF_FILENAME):
     build_pdf(PDF_FILENAME)
 
 # ---------------------------------------------------------
-# Custom CSS for High Contrast & Readability
+# Custom Premium CSS Theme & Color Palette
 # ---------------------------------------------------------
 st.markdown("""
 <style>
-    /* Dark Slate Background */
+    /* Google Fonts */
+    @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800&display=swap');
+    
+    html, body, [class*="css"] {
+        font-family: 'Inter', system-ui, sans-serif !important;
+    }
+
+    /* Overall Dark Canvas */
     .stApp {
-        background-color: #0F172A !important;
+        background: #0B1120 !important;
         color: #F8FAFC !important;
     }
     
-    /* Main Titles */
+    /* Header Gradient Title */
     .main-title {
-        font-family: 'Inter', system-ui, -apple-system, sans-serif;
-        background: linear-gradient(90deg, #38BDF8, #818CF8, #C084FC);
+        background: linear-gradient(90deg, #38BDF8 0%, #818CF8 50%, #C084FC 100%);
         -webkit-background-clip: text;
         -webkit-text-fill-color: transparent;
-        font-size: 2.4rem;
+        font-size: 2.5rem;
         font-weight: 800;
-        margin-bottom: 0.2rem;
+        letter-spacing: -0.02em;
+        margin-bottom: 0.25rem;
     }
     
     .sub-title {
-        color: #CBD5E1 !important;
+        color: #94A3B8 !important;
         font-size: 1.1rem;
-        margin-bottom: 1.5rem;
+        font-weight: 400;
+        margin-bottom: 1.8rem;
     }
     
-    /* Question Card Box */
+    /* Question Container Card */
     .q-card {
-        background-color: #1E293B !important;
+        background: #1E293B !important;
         border: 2px solid #334155 !important;
-        border-radius: 12px;
-        padding: 20px 24px;
-        box-shadow: 0 4px 20px rgba(0, 0, 0, 0.4);
-        margin-bottom: 20px;
+        border-radius: 14px;
+        padding: 24px;
+        box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
+        margin-bottom: 22px;
     }
     
     .q-card h3 {
         color: #FFFFFF !important;
         font-size: 1.25rem !important;
         font-weight: 700 !important;
-        margin-top: 8px !important;
+        line-height: 1.6 !important;
+        margin-top: 10px !important;
     }
 
-    /* Streamlit Radio Buttons Text & Labels Fix */
+    /* Streamlit Radio Buttons Options - High Contrast Fix */
     div[data-testid="stRadio"] label p {
-        font-size: 1.1rem !important;
+        font-size: 1.05rem !important;
         font-weight: 600 !important;
-        color: #FFFFFF !important;
+        color: #F8FAFC !important;
     }
 
     div[data-testid="stRadio"] div[role="radiogroup"] label {
         background-color: #1E293B !important;
-        border: 1px solid #475569 !important;
-        border-radius: 8px !important;
+        border: 2px solid #334155 !important;
+        border-radius: 10px !important;
         padding: 12px 18px !important;
         margin-bottom: 10px !important;
-        transition: all 0.2s ease-in-out;
+        transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
         cursor: pointer !important;
     }
 
     div[data-testid="stRadio"] div[role="radiogroup"] label:hover {
         background-color: #334155 !important;
         border-color: #38BDF8 !important;
+        transform: translateY(-1px);
     }
     
-    /* Checked radio button highlight */
+    /* Checked radio button state */
     div[data-testid="stRadio"] div[role="radiogroup"] label[aria-checked="true"] {
-        background-color: #1E3A8A !important;
+        background-color: #0F2942 !important;
         border: 2px solid #38BDF8 !important;
+        box-shadow: 0 0 15px rgba(56, 189, 248, 0.2);
     }
-
-    /* All General Paragraphs & Text */
-    p, span, label, div {
-        color: #F8FAFC;
-    }
-
-    /* Selectbox & Dropdown Label & Options */
-    div[data-testid="stSelectbox"] label p {
+    
+    div[data-testid="stRadio"] div[role="radiogroup"] label[aria-checked="true"] p {
         color: #38BDF8 !important;
         font-weight: 700 !important;
-        font-size: 1rem !important;
+    }
+
+    /* Inputs, Selectboxes, Dropdowns */
+    div[data-testid="stSelectbox"] label p, div[data-testid="stTextInput"] label p {
+        color: #38BDF8 !important;
+        font-weight: 700 !important;
+        font-size: 0.95rem !important;
+        text-transform: uppercase;
+        letter-spacing: 0.05em;
     }
     
-    div[data-baseweb="select"] {
+    div[data-baseweb="select"] > div {
         background-color: #1E293B !important;
-        border-color: #475569 !important;
+        border: 2px solid #334155 !important;
+        border-radius: 8px !important;
         color: #FFFFFF !important;
     }
 
     div[data-baseweb="select"] * {
         color: #FFFFFF !important;
+        background-color: #1E293B !important;
+    }
+    
+    input {
+        background-color: #1E293B !important;
+        color: #FFFFFF !important;
+        border: 2px solid #334155 !important;
+        border-radius: 8px !important;
     }
 
-    /* Badges */
+    /* Category Badges */
     .badge {
         display: inline-block;
-        padding: 4px 12px;
-        border-radius: 9999px;
-        font-size: 0.85rem;
+        padding: 6px 14px;
+        border-radius: 8px;
+        font-size: 0.8rem;
         font-weight: 700;
         text-transform: uppercase;
-        margin-bottom: 10px;
+        letter-spacing: 0.05em;
+        margin-bottom: 8px;
     }
     
     .badge-embedded { background: #0284C7; color: #FFFFFF; }
@@ -134,34 +157,45 @@ st.markdown("""
     /* Explanation Box */
     .explanation-box {
         background-color: #0F172A !important;
+        border: 1px solid #334155 !important;
         border-left: 5px solid #38BDF8 !important;
-        border-radius: 8px;
-        padding: 16px;
+        border-radius: 10px;
+        padding: 18px;
         margin-top: 15px;
         color: #F8FAFC !important;
     }
     
     .explanation-box h4 {
         color: #38BDF8 !important;
+        font-size: 1.1rem !important;
+        font-weight: 700 !important;
         margin-bottom: 8px !important;
     }
+    
+    .explanation-box p {
+        color: #CBD5E1 !important;
+        font-size: 1rem !important;
+        line-height: 1.6 !important;
+    }
 
-    /* Expander Styling */
-    .stExpander {
+    /* Expander Elements */
+    div[data-testid="stExpander"] {
         background-color: #1E293B !important;
-        border: 1px solid #475569 !important;
+        border: 1px solid #334155 !important;
         border-radius: 10px !important;
+        margin-bottom: 12px !important;
     }
     
-    .stExpander summary p {
+    div[data-testid="stExpander"] summary span {
         color: #38BDF8 !important;
+        font-size: 1.05rem !important;
         font-weight: 700 !important;
     }
 
     /* Sidebar Styling */
     section[data-testid="stSidebar"] {
-        background-color: #0F172A !important;
-        border-right: 1px solid #334155 !important;
+        background-color: #0B1120 !important;
+        border-right: 1px solid #1E293B !important;
     }
 
     section[data-testid="stSidebar"] label p {
@@ -169,19 +203,32 @@ st.markdown("""
         font-size: 1rem !important;
     }
 
+    /* Metrics Styling */
+    div[data-testid="stMetricValue"] {
+        color: #38BDF8 !important;
+        font-weight: 800 !important;
+        font-size: 2.2rem !important;
+    }
+    
+    div[data-testid="stMetricLabel"] {
+        color: #94A3B8 !important;
+        font-weight: 600 !important;
+    }
+
     /* Buttons */
     .stButton>button {
-        background-color: #2563EB !important;
+        background: linear-gradient(135deg, #2563EB 0%, #1D4ED8 100%) !important;
         color: #FFFFFF !important;
         border-radius: 8px !important;
         font-weight: 700 !important;
         border: none !important;
-        padding: 8px 16px !important;
+        padding: 10px 20px !important;
+        box-shadow: 0 4px 12px rgba(37, 99, 235, 0.3);
     }
 
     .stButton>button:hover {
-        background-color: #1D4ED8 !important;
-        box-shadow: 0 4px 12px rgba(37, 99, 235, 0.4);
+        background: linear-gradient(135deg, #1D4ED8 0%, #1E40AF 100%) !important;
+        box-shadow: 0 6px 16px rgba(37, 99, 235, 0.5);
     }
     
     /* Footer removal */
@@ -236,7 +283,7 @@ def get_badge_html(cat):
 # ---------------------------------------------------------
 if mode == "🎯 Practice Quiz Mode":
     st.markdown('<h1 class="main-title">🎯 Interactive Practice Quiz</h1>', unsafe_allow_html=True)
-    st.markdown('<p class="sub-title">Select an option to test your answer and unlock the step-by-step solution.</p>', unsafe_allow_html=True)
+    st.markdown('<p class="sub-title">Select an option below to test your answer and unlock the step-by-step solution.</p>', unsafe_allow_html=True)
     
     col_cat, col_num = st.columns([2, 1])
     with col_cat:
@@ -402,7 +449,7 @@ elif mode == "📊 Topic Analytics":
     counts = df['category'].value_counts()
     
     fig, ax = plt.subplots(figsize=(8, 4))
-    fig.patch.set_facecolor('#0F172A')
+    fig.patch.set_facecolor('#0B1120')
     ax.set_facecolor('#1E293B')
     
     colors = ['#38BDF8', '#FB923C', '#C084FC', '#4ADE80']
