@@ -3,13 +3,13 @@ import pandas as pd
 import numpy as np
 import matplotlib.pyplot as plt
 import os
-from generate_pdf import QUESTIONS_DATA, build_pdf
+from generate_pdf import QUESTIONS_DATA, PRACTICAL_ASSIGNMENT_CODE, build_pdf
 
 # ---------------------------------------------------------
 # Page Configuration
 # ---------------------------------------------------------
 st.set_page_config(
-    page_title="RCPS 420: Robotics & Embedded Systems Exam Prep",
+    page_title="RCPS 420: Robotics & Embedded Systems Exam & Practical Portal",
     page_icon="🤖",
     layout="wide",
     initial_sidebar_state="expanded"
@@ -26,7 +26,7 @@ if not os.path.exists(PDF_FILENAME):
 st.markdown("""
 <style>
     /* Google Fonts */
-    @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800&display=swap');
+    @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800&family=Fira+Code:wght@400;600&display=swap');
     
     html, body, [class*="css"] {
         font-family: 'Inter', system-ui, sans-serif !important;
@@ -43,7 +43,7 @@ st.markdown("""
         background: linear-gradient(90deg, #38BDF8 0%, #818CF8 50%, #C084FC 100%);
         -webkit-background-clip: text;
         -webkit-text-fill-color: transparent;
-        font-size: 2.5rem;
+        font-size: 2.4rem;
         font-weight: 800;
         letter-spacing: -0.02em;
         margin-bottom: 0.25rem;
@@ -51,7 +51,7 @@ st.markdown("""
     
     .sub-title {
         color: #94A3B8 !important;
-        font-size: 1.1rem;
+        font-size: 1.05rem;
         font-weight: 400;
         margin-bottom: 1.8rem;
     }
@@ -178,6 +178,19 @@ st.markdown("""
         line-height: 1.6 !important;
     }
 
+    /* Serial Terminal Simulation */
+    .terminal-box {
+        background-color: #030712 !important;
+        border: 2px solid #1E293B !important;
+        border-radius: 10px;
+        padding: 16px;
+        font-family: 'Fira Code', monospace !important;
+        color: #4ADE80 !important;
+        font-size: 0.95rem;
+        min-height: 80px;
+        box-shadow: inset 0 2px 8px rgba(0, 0, 0, 0.8);
+    }
+
     /* Expander Elements */
     div[data-testid="stExpander"] {
         background-color: #1E293B !important;
@@ -241,14 +254,20 @@ st.markdown("""
 # ---------------------------------------------------------
 with st.sidebar:
     st.image("https://img.icons8.com/isometric/96/robot.png", width=70)
-    st.markdown("### **RCPS 420 Exam Portal**")
+    st.markdown("### **RCPS 420 Exam & Lab Portal**")
     st.caption("Sunyani Technical University | Robotics & Embedded Systems")
     
     st.divider()
     
     mode = st.radio(
         "Navigation",
-        ["🎯 Practice Quiz Mode", "⏱️ Full Mock Exam", "📚 Solved Q&A Bank & PDF", "📊 Topic Analytics"],
+        [
+            "🎯 Practice Quiz Mode",
+            "⏱️ Full Mock Exam",
+            "🛠️ Practical Assignment & Simulator",
+            "📚 Solved Q&A Bank & PDF",
+            "📊 Topic Analytics"
+        ],
         index=0
     )
     
@@ -258,7 +277,7 @@ with st.sidebar:
     with open(PDF_FILENAME, "rb") as f:
         pdf_bytes = f.read()
     st.download_button(
-        label="📄 Download Solved Q&A (PDF)",
+        label="📄 Download Solved Q&A + Lab PDF",
         data=pdf_bytes,
         file_name="Robotics_Embedded_Systems_Exam_Guide.pdf",
         mime="application/pdf",
@@ -414,7 +433,75 @@ elif mode == "⏱️ Full Mock Exam":
                     st.info(f"**Explanation:** {q['explanation']}")
 
 # ---------------------------------------------------------
-# Mode 3: 📚 Solved Q&A Bank & PDF
+# Mode 3: 🛠️ Practical Assignment & Simulator
+# ---------------------------------------------------------
+elif mode == "🛠️ Practical Assignment & Simulator":
+    st.markdown('<h1 class="main-title">🛠️ Practical Assignment Solution & Hardware Simulator</h1>', unsafe_allow_html=True)
+    st.markdown('<p class="sub-title">Ultrasonic Security System — Arduino Uno, HC-SR04, Green/Yellow/Red LEDs, and Buzzer.</p>', unsafe_allow_html=True)
+    
+    st.markdown("### 📋 **Assignment Requirements & Pin Mapping**")
+    
+    col_t1, col_t2 = st.columns(2)
+    with col_t1:
+        st.markdown("""
+        #### **Table 1: Pin Location Definitions**
+        - `#define trigPin 9` (Digital Pin 9)
+        - `#define echoPin 8` (Digital Pin 8)
+        - `#define LEDlampRed 7` (Digital Pin 7)
+        - `#define LEDlampYellow 6` (Digital Pin 6)
+        - `#define LEDlampGreen 5` (Digital Pin 5)
+        - `#define soundbuzzer 4` (Digital Pin 4)
+        """)
+        
+    with col_t2:
+        st.markdown("""
+        #### **Table 2: Condition & Task Requirements**
+        - **Distance > 80cm:** Light the **Green LED**.
+        - **Distance > 50cm (and <= 80cm):** Light the **Yellow LED**.
+        - **Distance < 20cm (0 to 20cm):** 
+          - a. Light the **Red LED**
+          - b. Sound the **Buzzer**
+          - c. Print distance as output to **Serial Monitor**
+        """)
+        
+    st.divider()
+    st.markdown("### 🎛️ **Live Hardware & Circuit Simulator**")
+    st.caption("Drag the distance slider to simulate the HC-SR04 ultrasonic sensor detecting an object.")
+    
+    dist_sim = st.slider("Simulated Object Distance (cm)", min_value=0.0, max_value=120.0, value=95.0, step=0.5)
+    
+    # Calculate state
+    green_on = dist_sim > 80.0
+    yellow_on = (dist_sim > 50.0) and (dist_sim <= 80.0)
+    red_on = (dist_sim >= 0.0) and (dist_sim <= 20.0)
+    buzzer_on = red_on
+    
+    col_led1, col_led2, col_led3, col_buzz = st.columns(4)
+    with col_led1:
+        st.metric("🟢 Green LED (Pin 5)", "ON 💡" if green_on else "OFF ⚪")
+    with col_led2:
+        st.metric("🟡 Yellow LED (Pin 6)", "ON 💡" if yellow_on else "OFF ⚪")
+    with col_led3:
+        st.metric("🔴 Red LED (Pin 7)", "ON 💡" if red_on else "OFF ⚪")
+    with col_buzz:
+        st.metric("🔊 Buzzer (Pin 4)", "ALARM ON 📢" if buzzer_on else "OFF ⚪")
+        
+    st.markdown("#### 📺 **Virtual Arduino Serial Monitor Output**")
+    if red_on:
+        st.markdown(f'<div class="terminal-box">> SECURITY ALERT! Intruder distance: {dist_sim:.1f} cm<br/>> BUZZER ACTIVATED (Pin 4 HIGH)<br/>> RED LED ACTIVATED (Pin 7 HIGH)</div>', unsafe_allow_html=True)
+    elif yellow_on:
+        st.markdown(f'<div class="terminal-box" style="color:#FACC15;">> WARNING: Object approaching within 50cm-80cm range ({dist_sim:.1f} cm)<br/>> YELLOW LED ACTIVATED (Pin 6 HIGH)</div>', unsafe_allow_html=True)
+    elif green_on:
+        st.markdown(f'<div class="terminal-box" style="color:#38BDF8;">> SYSTEM CLEAR: Area safe (>80cm, current: {dist_sim:.1f} cm)<br/>> GREEN LED ACTIVATED (Pin 5 HIGH)</div>', unsafe_allow_html=True)
+    else:
+        st.markdown(f'<div class="terminal-box" style="color:#94A3B8;">> TRANSITION ZONE: Distance between 20cm and 50cm ({dist_sim:.1f} cm)<br/>> ALL ALERTS STANDBY</div>', unsafe_allow_html=True)
+
+    st.divider()
+    st.markdown("### 💻 **Complete Arduino C++ Code Solution**")
+    st.code(PRACTICAL_ASSIGNMENT_CODE, language="cpp")
+
+# ---------------------------------------------------------
+# Mode 4: 📚 Solved Q&A Bank & PDF
 # ---------------------------------------------------------
 elif mode == "📚 Solved Q&A Bank & PDF":
     st.markdown('<h1 class="main-title">📚 Solved Question Bank</h1>', unsafe_allow_html=True)
@@ -439,7 +526,7 @@ elif mode == "📚 Solved Q&A Bank & PDF":
             st.info(f"**Explanation:** {q['explanation']}")
 
 # ---------------------------------------------------------
-# Mode 4: 📊 Topic Analytics
+# Mode 5: 📊 Topic Analytics
 # ---------------------------------------------------------
 elif mode == "📊 Topic Analytics":
     st.markdown('<h1 class="main-title">📊 Course Topic Distribution</h1>', unsafe_allow_html=True)

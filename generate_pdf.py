@@ -341,6 +341,96 @@ QUESTIONS_DATA = [
     }
 ]
 
+PRACTICAL_ASSIGNMENT_CODE = """/*
+ * ROBOTICS AND EMBEDDED CONTROL SYSTEMS
+ * PRACTICAL ASSIGNMENT: Ultrasonic Security System Sketch
+ * Board: Arduino Uno
+ */
+
+#define trigPin        9  // Sensor Trig on Digital Pin 9
+#define echoPin        8  // Sensor Echo on Digital Pin 8
+#define LEDlampRed     7  // Red LED on Digital Pin 7
+#define LEDlampYellow  6  // Yellow LED on Digital Pin 6
+#define LEDlampGreen   5  // Green LED on Digital Pin 5
+#define soundbuzzer    4  // Buzzer on Digital Pin 4
+
+void setup() {
+  // Initialize Serial Communication
+  Serial.begin(9600);
+  
+  // Set Pin Modes
+  pinMode(trigPin, OUTPUT);
+  pinMode(echoPin, INPUT);
+  pinMode(LEDlampRed, OUTPUT);
+  pinMode(LEDlampYellow, OUTPUT);
+  pinMode(LEDlampGreen, OUTPUT);
+  pinMode(soundbuzzer, OUTPUT);
+  
+  // Turn off all outputs initially
+  digitalWrite(LEDlampRed, LOW);
+  digitalWrite(LEDlampYellow, LOW);
+  digitalWrite(LEDlampGreen, LOW);
+  digitalWrite(soundbuzzer, LOW);
+}
+
+void loop() {
+  long duration;
+  float distance;
+
+  // Clear trigPin
+  digitalWrite(trigPin, LOW);
+  delayMicroseconds(2);
+
+  // Send 10 microsecond HIGH pulse
+  digitalWrite(trigPin, HIGH);
+  delayMicroseconds(10);
+  digitalWrite(trigPin, LOW);
+
+  // Measure pulse duration on echoPin
+  duration = pulseIn(echoPin, HIGH);
+
+  // Calculate distance in cm (Speed of sound = 343 m/s = 0.0343 cm/us)
+  distance = (duration * 0.0343) / 2.0;
+
+  // --- Task Conditions Implementation ---
+  
+  // Condition 1: Distance > 80 cm -> Light Green LED
+  if (distance > 80.0) {
+    digitalWrite(LEDlampGreen, HIGH);
+    digitalWrite(LEDlampYellow, LOW);
+    digitalWrite(LEDlampRed, LOW);
+    digitalWrite(soundbuzzer, LOW);
+  }
+  // Condition 2: Distance > 50 cm and <= 80 cm -> Light Yellow LED
+  else if (distance > 50.0 && distance <= 80.0) {
+    digitalWrite(LEDlampGreen, LOW);
+    digitalWrite(LEDlampYellow, HIGH);
+    digitalWrite(LEDlampRed, LOW);
+    digitalWrite(soundbuzzer, LOW);
+  }
+  // Condition 3: Distance from 0 to 20 cm -> Light Red LED, Sound Buzzer, Print Distance
+  else if (distance >= 0.0 && distance <= 20.0) {
+    digitalWrite(LEDlampGreen, LOW);
+    digitalWrite(LEDlampYellow, LOW);
+    digitalWrite(LEDlampRed, HIGH);
+    digitalWrite(soundbuzzer, HIGH); // Sound the buzzer
+    
+    // Print distance as output to Serial Monitor
+    Serial.print("SECURITY ALERT! Intruder distance: ");
+    Serial.print(distance);
+    Serial.println(" cm");
+  }
+  // Safe zone between 20 cm and 50 cm
+  else {
+    digitalWrite(LEDlampGreen, LOW);
+    digitalWrite(LEDlampYellow, LOW);
+    digitalWrite(LEDlampRed, LOW);
+    digitalWrite(soundbuzzer, LOW);
+  }
+
+  delay(200); // Small delay before next pulse
+}"""
+
 def build_pdf(filename="robotics_embedded_exam_guide.pdf"):
     try:
         from reportlab.lib.pagesizes import letter
@@ -392,15 +482,6 @@ def build_pdf(filename="robotics_embedded_exam_guide.pdf"):
             spaceAfter=8
         )
 
-        q_num_style = ParagraphStyle(
-            'QNum',
-            parent=styles['Normal'],
-            fontName='Helvetica-Bold',
-            fontSize=11,
-            leading=14,
-            textColor=colors.HexColor('#2563EB')
-        )
-
         q_text_style = ParagraphStyle(
             'QText',
             parent=styles['Normal'],
@@ -437,11 +518,20 @@ def build_pdf(filename="robotics_embedded_exam_guide.pdf"):
             textColor=colors.HexColor('#475569')
         )
 
+        code_style = ParagraphStyle(
+            'CodeText',
+            parent=styles['Normal'],
+            fontName='Courier',
+            fontSize=8.5,
+            leading=11,
+            textColor=colors.HexColor('#0F172A')
+        )
+
         story = []
 
         # Title Block
         story.append(Paragraph("RCPS 420: ROBOTICS & EMBEDDED SYSTEMS", title_style))
-        story.append(Paragraph("EXAM REVISION GUIDE & ALL 42 SOLVED QUESTIONS", subtitle_style))
+        story.append(Paragraph("EXAM REVISION GUIDE, ALL 42 SOLVED QUESTIONS & PRACTICAL SOLUTION", subtitle_style))
         story.append(HRFlowable(width="100%", thickness=2, color=colors.HexColor('#2563EB'), spaceAfter=15))
 
         # Group by Category
@@ -489,6 +579,41 @@ def build_pdf(filename="robotics_embedded_exam_guide.pdf"):
 
                 story.append(t)
                 story.append(Spacer(1, 10))
+
+        # --- Practical Assignment Section ---
+        story.append(PageBreak())
+        story.append(Paragraph("🛠️ PRACTICAL ASSIGNMENT: ULTRASONIC SECURITY SYSTEM", cat_header_style))
+        story.append(HRFlowable(width="100%", thickness=2, color=colors.HexColor('#2563EB'), spaceAfter=10))
+
+        desc_text = Paragraph("<b>Task Description:</b> Create an Arduino sketch for an Ultrasonic Security System using Arduino Uno, HC-SR04 ultrasonic sensor, Green/Yellow/Red LEDs, and a buzzer according to the pin definitions and conditions below.", exp_style)
+        story.append(desc_text)
+        story.append(Spacer(1, 10))
+
+        # Table 1 & Table 2 summary
+        t1_title = Paragraph("<b>Table 1: Pin Definitions</b>", q_text_style)
+        t1_content = Paragraph("• trigPin = Pin 9<br/>• echoPin = Pin 8<br/>• Red LED = Pin 7<br/>• Yellow LED = Pin 6<br/>• Green LED = Pin 5<br/>• Buzzer = Pin 4", opt_style)
+
+        t2_title = Paragraph("<b>Table 2: Required Task Conditions</b>", q_text_style)
+        t2_content = Paragraph("• <b>Distance > 80cm:</b> Turn ON Green LED<br/>• <b>Distance > 50cm:</b> Turn ON Yellow LED<br/>• <b>Distance < 20cm:</b> Turn ON Red LED<br/>• <b>Distance 0 to 20cm:</b> Sound Buzzer & Print distance to Serial Monitor", opt_style)
+
+        tbl = Table([[t1_title, t2_title], [t1_content, t2_content]], colWidths=[260, 270])
+        tbl.setStyle(TableStyle([
+            ('BACKGROUND', (0,0), (-1,0), colors.HexColor('#E2E8F0')),
+            ('BACKGROUND', (0,1), (-1,1), colors.HexColor('#F8FAFC')),
+            ('BOX', (0,0), (-1,-1), 1, colors.HexColor('#CBD5E1')),
+            ('INNERGRID', (0,0), (-1,-1), 0.5, colors.HexColor('#E2E8F0')),
+            ('PADDING', (0,0), (-1,-1), 8)
+        ]))
+        story.append(tbl)
+        story.append(Spacer(1, 15))
+
+        story.append(Paragraph("<b>Complete Arduino Sketch (C++ Solution):</b>", q_text_style))
+        story.append(Spacer(1, 6))
+
+        # Format code lines as paginated Paragraphs so ReportLab breaks across pages smoothly
+        for line in PRACTICAL_ASSIGNMENT_CODE.split('\n'):
+            line_html = line.replace('&', '&amp;').replace('<', '&lt;').replace('>', '&gt;').replace(' ', '&nbsp;')
+            story.append(Paragraph(line_html if line_html else '&nbsp;', code_style))
 
         doc.build(story)
         print(f"PDF successfully generated: {filename}")
