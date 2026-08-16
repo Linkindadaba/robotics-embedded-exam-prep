@@ -341,24 +341,24 @@ QUESTIONS_DATA = [
     }
 ]
 
-PRACTICAL_ASSIGNMENT_CODE = """/*
+PRACTICAL_ASSIGNMENT_CODE_EXAM = """/*
  * ROBOTICS AND EMBEDDED CONTROL SYSTEMS
- * PRACTICAL ASSIGNMENT: Ultrasonic Security System Sketch
- * Board: Arduino Uno
+ * SECTION B - PRACTICAL EXAM SOLUTION (practicals.jpg)
+ * Board: Arduino Uno | Duration: 1 Hour 30 Minutes
  */
 
-#define trigPin        9  // Sensor Trig on Digital Pin 9
-#define echoPin        8  // Sensor Echo on Digital Pin 8
-#define LEDlampRed     7  // Red LED on Digital Pin 7
-#define LEDlampYellow  6  // Yellow LED on Digital Pin 6
-#define LEDlampGreen   5  // Green LED on Digital Pin 5
-#define soundbuzzer    4  // Buzzer on Digital Pin 4
+#define trigPin        6  // Sensor Trig on digital pin 6
+#define echoPin        5  // Sensor Echo on digital pin 5
+#define LEDlampRed     8  // Red LED on digital pin 8
+#define LEDlampYellow  3  // Yellow LED on digital pin 3
+#define LEDlampGreen   4  // Green LED on digital pin 4
+#define soundbuzzer    7  // Buzzer on digital pin 7
+
+int sound = 600; // Initialization of buzzer sound (frequency 600 Hz)
 
 void setup() {
-  // Initialize Serial Communication
   Serial.begin(9600);
   
-  // Set Pin Modes
   pinMode(trigPin, OUTPUT);
   pinMode(echoPin, INPUT);
   pinMode(LEDlampRed, OUTPUT);
@@ -370,65 +370,72 @@ void setup() {
   digitalWrite(LEDlampRed, LOW);
   digitalWrite(LEDlampYellow, LOW);
   digitalWrite(LEDlampGreen, LOW);
-  digitalWrite(soundbuzzer, LOW);
+  noTone(soundbuzzer);
 }
 
 void loop() {
   long duration;
   float distance;
 
-  // Clear trigPin
+  // Send 10us HIGH trigger pulse
   digitalWrite(trigPin, LOW);
   delayMicroseconds(2);
-
-  // Send 10 microsecond HIGH pulse
   digitalWrite(trigPin, HIGH);
   delayMicroseconds(10);
   digitalWrite(trigPin, LOW);
 
-  // Measure pulse duration on echoPin
+  // Read echo pulse travel time
   duration = pulseIn(echoPin, HIGH);
 
-  // Calculate distance in cm (Speed of sound = 343 m/s = 0.0343 cm/us)
+  // Compute distance in cm (Speed of sound = 0.0343 cm/us)
   distance = (duration * 0.0343) / 2.0;
 
-  // --- Task Conditions Implementation ---
-  
-  // Condition 1: Distance > 80 cm -> Light Green LED
-  if (distance > 80.0) {
+  // --- Task Conditions Implementation (Table 2) ---
+
+  // Condition 1: Distance > 70cm -> Light green LED
+  if (distance > 70.0) {
     digitalWrite(LEDlampGreen, HIGH);
     digitalWrite(LEDlampYellow, LOW);
     digitalWrite(LEDlampRed, LOW);
-    digitalWrite(soundbuzzer, LOW);
+    noTone(soundbuzzer);
   }
-  // Condition 2: Distance > 50 cm and <= 80 cm -> Light Yellow LED
-  else if (distance > 50.0 && distance <= 80.0) {
+  // Condition 2: Distance > 24cm and <= 70cm -> Light Yellow LED
+  else if (distance > 24.0 && distance <= 70.0) {
     digitalWrite(LEDlampGreen, LOW);
     digitalWrite(LEDlampYellow, HIGH);
     digitalWrite(LEDlampRed, LOW);
-    digitalWrite(soundbuzzer, LOW);
+    noTone(soundbuzzer);
   }
-  // Condition 3: Distance from 0 to 20 cm -> Light Red LED, Sound Buzzer, Print Distance
-  else if (distance >= 0.0 && distance <= 20.0) {
+  // Condition 4: Distance 0 to 11cm -> Light Red LED, Sound Buzzer (600Hz), Print Distance
+  else if (distance >= 0.0 && distance <= 11.0) {
     digitalWrite(LEDlampGreen, LOW);
     digitalWrite(LEDlampYellow, LOW);
     digitalWrite(LEDlampRed, HIGH);
-    digitalWrite(soundbuzzer, HIGH); // Sound the buzzer
     
-    // Print distance as output to Serial Monitor
-    Serial.print("SECURITY ALERT! Intruder distance: ");
+    // a. Sound the buzzer with 600Hz tone
+    tone(soundbuzzer, sound);
+    
+    // b. Print distance as output to Serial Monitor
+    Serial.print("Intruder Alert! Distance: ");
     Serial.print(distance);
     Serial.println(" cm");
   }
-  // Safe zone between 20 cm and 50 cm
+  // Condition 3: Distance < 12cm (between 11cm and 12cm) -> Light Red LED
+  else if (distance < 12.0) {
+    digitalWrite(LEDlampGreen, LOW);
+    digitalWrite(LEDlampYellow, LOW);
+    digitalWrite(LEDlampRed, HIGH);
+    noTone(soundbuzzer);
+  }
+  // Buffer Zone (between 12cm and 24cm)
   else {
     digitalWrite(LEDlampGreen, LOW);
     digitalWrite(LEDlampYellow, LOW);
     digitalWrite(LEDlampRed, LOW);
-    digitalWrite(soundbuzzer, LOW);
+    noTone(soundbuzzer);
   }
 
-  delay(200); // Small delay before next pulse
+  delay(200);
 }"""
 
 def build_pdf(filename="robotics_embedded_exam_guide.pdf"):
@@ -580,21 +587,21 @@ def build_pdf(filename="robotics_embedded_exam_guide.pdf"):
                 story.append(t)
                 story.append(Spacer(1, 10))
 
-        # --- Practical Assignment Section ---
+        # --- Practical Exam Section (practicals.jpg) ---
         story.append(PageBreak())
-        story.append(Paragraph("🛠️ PRACTICAL ASSIGNMENT: ULTRASONIC SECURITY SYSTEM", cat_header_style))
+        story.append(Paragraph("🛠️ SECTION B: PRACTICAL EXAM SOLUTION (18 Marks)", cat_header_style))
         story.append(HRFlowable(width="100%", thickness=2, color=colors.HexColor('#2563EB'), spaceAfter=10))
 
-        desc_text = Paragraph("<b>Task Description:</b> Create an Arduino sketch for an Ultrasonic Security System using Arduino Uno, HC-SR04 ultrasonic sensor, Green/Yellow/Red LEDs, and a buzzer according to the pin definitions and conditions below.", exp_style)
+        desc_text = Paragraph("<b>Task Description (practicals.jpg):</b> Create an Arduino sketch for an Ultrasonic Security System using Arduino Uno, HC-SR04 ultrasonic sensor, Green/Yellow/Red LEDs, and a buzzer according to the exam pin mapping and conditions below.", exp_style)
         story.append(desc_text)
         story.append(Spacer(1, 10))
 
         # Table 1 & Table 2 summary
-        t1_title = Paragraph("<b>Table 1: Pin Definitions</b>", q_text_style)
-        t1_content = Paragraph("• trigPin = Pin 9<br/>• echoPin = Pin 8<br/>• Red LED = Pin 7<br/>• Yellow LED = Pin 6<br/>• Green LED = Pin 5<br/>• Buzzer = Pin 4", opt_style)
+        t1_title = Paragraph("<b>Table 1: Exam Pin Location Definitions</b>", q_text_style)
+        t1_content = Paragraph("• trigPin = Pin 6<br/>• echoPin = Pin 5<br/>• Red LED = Pin 8<br/>• Yellow LED = Pin 3<br/>• Green LED = Pin 4<br/>• soundbuzzer = Pin 7<br/>• int sound = 600 (Hz)", opt_style)
 
         t2_title = Paragraph("<b>Table 2: Required Task Conditions</b>", q_text_style)
-        t2_content = Paragraph("• <b>Distance > 80cm:</b> Turn ON Green LED<br/>• <b>Distance > 50cm:</b> Turn ON Yellow LED<br/>• <b>Distance < 20cm:</b> Turn ON Red LED<br/>• <b>Distance 0 to 20cm:</b> Sound Buzzer & Print distance to Serial Monitor", opt_style)
+        t2_content = Paragraph("• <b>Distance > 70cm:</b> Turn ON Green LED<br/>• <b>Distance > 24cm:</b> Turn ON Yellow LED<br/>• <b>Distance < 12cm:</b> Turn ON Red LED<br/>• <b>Distance 0 to 11cm:</b> Sound Buzzer (600Hz) & Print distance to Serial Monitor", opt_style)
 
         tbl = Table([[t1_title, t2_title], [t1_content, t2_content]], colWidths=[260, 270])
         tbl.setStyle(TableStyle([
@@ -607,11 +614,11 @@ def build_pdf(filename="robotics_embedded_exam_guide.pdf"):
         story.append(tbl)
         story.append(Spacer(1, 15))
 
-        story.append(Paragraph("<b>Complete Arduino Sketch (C++ Solution):</b>", q_text_style))
+        story.append(Paragraph("<b>Complete Arduino C++ Sketch Solution (practicals.jpg):</b>", q_text_style))
         story.append(Spacer(1, 6))
 
         # Format code lines as paginated Paragraphs so ReportLab breaks across pages smoothly
-        for line in PRACTICAL_ASSIGNMENT_CODE.split('\n'):
+        for line in PRACTICAL_ASSIGNMENT_CODE_EXAM.split('\n'):
             line_html = line.replace('&', '&amp;').replace('<', '&lt;').replace('>', '&gt;').replace(' ', '&nbsp;')
             story.append(Paragraph(line_html if line_html else '&nbsp;', code_style))
 

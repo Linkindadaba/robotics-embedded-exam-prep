@@ -3,7 +3,7 @@ import pandas as pd
 import numpy as np
 import matplotlib.pyplot as plt
 import os
-from generate_pdf import QUESTIONS_DATA, PRACTICAL_ASSIGNMENT_CODE, build_pdf
+from generate_pdf import QUESTIONS_DATA, PRACTICAL_ASSIGNMENT_CODE_EXAM, build_pdf
 
 # ---------------------------------------------------------
 # Page Configuration
@@ -264,7 +264,7 @@ with st.sidebar:
         [
             "🎯 Practice Quiz Mode",
             "⏱️ Full Mock Exam",
-            "🛠️ Practical Assignment & Simulator",
+            "🛠️ Practical Exam & Hardware Simulator",
             "📚 Solved Q&A Bank & PDF",
             "📊 Topic Analytics"
         ],
@@ -433,72 +433,75 @@ elif mode == "⏱️ Full Mock Exam":
                     st.info(f"**Explanation:** {q['explanation']}")
 
 # ---------------------------------------------------------
-# Mode 3: 🛠️ Practical Assignment & Simulator
+# Mode 3: 🛠️ Practical Exam & Hardware Simulator
 # ---------------------------------------------------------
-elif mode == "🛠️ Practical Assignment & Simulator":
-    st.markdown('<h1 class="main-title">🛠️ Practical Assignment Solution & Hardware Simulator</h1>', unsafe_allow_html=True)
-    st.markdown('<p class="sub-title">Ultrasonic Security System — Arduino Uno, HC-SR04, Green/Yellow/Red LEDs, and Buzzer.</p>', unsafe_allow_html=True)
+elif mode == "🛠️ Practical Exam & Hardware Simulator":
+    st.markdown('<h1 class="main-title">🛠️ Section B: Practical Exam Solution & Hardware Simulator</h1>', unsafe_allow_html=True)
+    st.markdown('<p class="sub-title">Ultrasonic Security System (18 Marks) — Solution for <b>practicals.jpg</b> & <b>practical.pdf</b>.</p>', unsafe_allow_html=True)
     
-    st.markdown("### 📋 **Assignment Requirements & Pin Mapping**")
+    st.markdown("### 📋 **Pin Mapping & Task Requirements**")
     
     col_t1, col_t2 = st.columns(2)
     with col_t1:
         st.markdown("""
-        #### **Table 1: Pin Location Definitions**
-        - `#define trigPin 9` (Digital Pin 9)
-        - `#define echoPin 8` (Digital Pin 8)
-        - `#define LEDlampRed 7` (Digital Pin 7)
-        - `#define LEDlampYellow 6` (Digital Pin 6)
-        - `#define LEDlampGreen 5` (Digital Pin 5)
-        - `#define soundbuzzer 4` (Digital Pin 4)
+        #### **Table 1: Pin Location Definitions (practicals.jpg)**
+        - `#define trigPin 6` (Digital Pin 6)
+        - `#define echoPin 5` (Digital Pin 5)
+        - `#define LEDlampRed 8` (Digital Pin 8)
+        - `#define LEDlampYellow 3` (Digital Pin 3)
+        - `#define LEDlampGreen 4` (Digital Pin 4)
+        - `#define soundbuzzer 7` (Digital Pin 7)
+        - `int sound = 600;` (Buzzer Tone Frequency: 600 Hz)
         """)
         
     with col_t2:
         st.markdown("""
         #### **Table 2: Condition & Task Requirements**
-        - **Distance > 80cm:** Light the **Green LED**.
-        - **Distance > 50cm (and <= 80cm):** Light the **Yellow LED**.
-        - **Distance < 20cm (0 to 20cm):** 
-          - a. Light the **Red LED**
-          - b. Sound the **Buzzer**
-          - c. Print distance as output to **Serial Monitor**
+        - **Distance > 70cm:** Light the **Green LED** (Pin 4).
+        - **Distance > 24cm (and <= 70cm):** Light the **Yellow LED** (Pin 3).
+        - **Distance < 12cm:** Light the **Red LED** (Pin 8).
+        - **Distance 0 to 11cm:** 
+          - a. Sound the **Buzzer** (`tone(7, 600)`)
+          - b. Print distance as output to **Serial Monitor**
         """)
         
     st.divider()
     st.markdown("### 🎛️ **Live Hardware & Circuit Simulator**")
     st.caption("Drag the distance slider to simulate the HC-SR04 ultrasonic sensor detecting an object.")
     
-    dist_sim = st.slider("Simulated Object Distance (cm)", min_value=0.0, max_value=120.0, value=95.0, step=0.5)
+    dist_sim = st.slider("Simulated Object Distance (cm)", min_value=0.0, max_value=120.0, value=8.5, step=0.5)
     
-    # Calculate state
-    green_on = dist_sim > 80.0
-    yellow_on = (dist_sim > 50.0) and (dist_sim <= 80.0)
-    red_on = (dist_sim >= 0.0) and (dist_sim <= 20.0)
-    buzzer_on = red_on
+    # Calculate state based on practicals.jpg exam paper
+    green_on = dist_sim > 70.0
+    yellow_on = (dist_sim > 24.0) and (dist_sim <= 70.0)
+    red_on = dist_sim < 12.0
+    buzzer_on = (dist_sim >= 0.0) and (dist_sim <= 11.0)
     
     col_led1, col_led2, col_led3, col_buzz = st.columns(4)
     with col_led1:
-        st.metric("🟢 Green LED (Pin 5)", "ON 💡" if green_on else "OFF ⚪")
+        st.metric("🟢 Green LED (Pin 4)", "ON 💡" if green_on else "OFF ⚪")
     with col_led2:
-        st.metric("🟡 Yellow LED (Pin 6)", "ON 💡" if yellow_on else "OFF ⚪")
+        st.metric("🟡 Yellow LED (Pin 3)", "ON 💡" if yellow_on else "OFF ⚪")
     with col_led3:
-        st.metric("🔴 Red LED (Pin 7)", "ON 💡" if red_on else "OFF ⚪")
+        st.metric("🔴 Red LED (Pin 8)", "ON 💡" if red_on else "OFF ⚪")
     with col_buzz:
-        st.metric("🔊 Buzzer (Pin 4)", "ALARM ON 📢" if buzzer_on else "OFF ⚪")
+        st.metric("🔊 Buzzer (Pin 7 @ 600Hz)", "ALARM ON 📢" if buzzer_on else "OFF ⚪")
         
     st.markdown("#### 📺 **Virtual Arduino Serial Monitor Output**")
-    if red_on:
-        st.markdown(f'<div class="terminal-box">> SECURITY ALERT! Intruder distance: {dist_sim:.1f} cm<br/>> BUZZER ACTIVATED (Pin 4 HIGH)<br/>> RED LED ACTIVATED (Pin 7 HIGH)</div>', unsafe_allow_html=True)
+    if buzzer_on:
+        st.markdown(f'<div class="terminal-box">> INTRUDER ALERT! Object distance: {dist_sim:.1f} cm (0-11cm range)<br/>> TONE ACTIVATED: tone(soundbuzzer, 600) on Pin 7<br/>> RED LED ACTIVATED: Pin 8 HIGH</div>', unsafe_allow_html=True)
+    elif red_on:
+        st.markdown(f'<div class="terminal-box" style="color:#EF4444;">> WARNING: Object distance < 12cm ({dist_sim:.1f} cm)<br/>> RED LED ACTIVATED: Pin 8 HIGH</div>', unsafe_allow_html=True)
     elif yellow_on:
-        st.markdown(f'<div class="terminal-box" style="color:#FACC15;">> WARNING: Object approaching within 50cm-80cm range ({dist_sim:.1f} cm)<br/>> YELLOW LED ACTIVATED (Pin 6 HIGH)</div>', unsafe_allow_html=True)
+        st.markdown(f'<div class="terminal-box" style="color:#FACC15;">> CAUTION: Object approaching (>24cm to 70cm range, current: {dist_sim:.1f} cm)<br/>> YELLOW LED ACTIVATED: Pin 3 HIGH</div>', unsafe_allow_html=True)
     elif green_on:
-        st.markdown(f'<div class="terminal-box" style="color:#38BDF8;">> SYSTEM CLEAR: Area safe (>80cm, current: {dist_sim:.1f} cm)<br/>> GREEN LED ACTIVATED (Pin 5 HIGH)</div>', unsafe_allow_html=True)
+        st.markdown(f'<div class="terminal-box" style="color:#38BDF8;">> SYSTEM CLEAR: Area safe (>70cm, current: {dist_sim:.1f} cm)<br/>> GREEN LED ACTIVATED: Pin 4 HIGH</div>', unsafe_allow_html=True)
     else:
-        st.markdown(f'<div class="terminal-box" style="color:#94A3B8;">> TRANSITION ZONE: Distance between 20cm and 50cm ({dist_sim:.1f} cm)<br/>> ALL ALERTS STANDBY</div>', unsafe_allow_html=True)
+        st.markdown(f'<div class="terminal-box" style="color:#94A3B8;">> BUFFER ZONE: Distance between 12cm and 24cm ({dist_sim:.1f} cm)<br/>> ALL ALERTS STANDBY</div>', unsafe_allow_html=True)
 
     st.divider()
-    st.markdown("### 💻 **Complete Arduino C++ Code Solution**")
-    st.code(PRACTICAL_ASSIGNMENT_CODE, language="cpp")
+    st.markdown("### 💻 **Complete Arduino C++ Code Solution (practicals.jpg)**")
+    st.code(PRACTICAL_ASSIGNMENT_CODE_EXAM, language="cpp")
 
 # ---------------------------------------------------------
 # Mode 4: 📚 Solved Q&A Bank & PDF
